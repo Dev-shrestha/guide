@@ -147,9 +147,116 @@ export const DataProvider = ({ children }) => {
   });
   const [requests, setRequests] = useState(() => {
     const stored = localStorage.getItem('nepal_guide_requests');
-    return stored ? JSON.parse(stored) : [];
+    return stored ? JSON.parse(stored) : generateDemoRequests();
   });
 
+  // Generate demo requests with some assigned to demo guide
+  function generateDemoRequests() {
+    const demoRequests = [
+      {
+        id: 'demo-request-1',
+        touristId: 'demo-tourist-1',
+        touristName: 'Demo Tourist',
+        touristEmail: 'tourist@demo.com',
+        selectedDestinations: [1, 2], // Everest Base Camp, Pokhara
+        preferredLanguage: 'English',
+        tourType: 'trekking',
+        duration: '1 week',
+        groupSize: '2 people',
+        specialInterests: ['Photography', 'Culture'],
+        startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 1 week from now
+        budget: 'moderate',
+        additionalRequirements: 'Vegetarian meals preferred',
+        emergencyContact: 'John Doe +1-555-0123',
+        fitnessLevel: 'moderate',
+        status: 'assigned',
+        assignedGuide: 'demo-guide-1',
+        submittedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+        assignedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+        destinationNames: [
+          { id: 1, name: 'Everest Base Camp' },
+          { id: 2, name: 'Pokhara' }
+        ]
+      },
+      {
+        id: 'demo-request-2',
+        touristId: 'demo-tourist-2',
+        touristName: 'Sarah Johnson',
+        touristEmail: 'sarah.johnson@email.com',
+        selectedDestinations: [4, 6], // Kathmandu Valley, Lumbini
+        preferredLanguage: 'English',
+        tourType: 'culture',
+        duration: '3-5 days',
+        groupSize: 'Solo',
+        specialInterests: ['Spiritual/Religious', 'History'],
+        startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks from now
+        budget: 'premium',
+        additionalRequirements: 'Interested in meditation sessions',
+        emergencyContact: 'Mike Johnson +1-555-0456',
+        fitnessLevel: 'beginner',
+        status: 'assigned',
+        assignedGuide: 'demo-guide-1',
+        submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+        assignedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(), // 6 hours ago
+        destinationNames: [
+          { id: 4, name: 'Kathmandu Valley' },
+          { id: 6, name: 'Lumbini' }
+        ]
+      },
+      {
+        id: 'demo-request-3',
+        touristId: 'demo-tourist-3',
+        touristName: 'Michael Chen',
+        touristEmail: 'michael.chen@email.com',
+        selectedDestinations: [3], // Chitwan National Park
+        preferredLanguage: 'English',
+        tourType: 'adventure',
+        duration: '3-5 days',
+        groupSize: '3-5 people',
+        specialInterests: ['Wildlife', 'Photography'],
+        startDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 3 weeks from now
+        budget: 'moderate',
+        additionalRequirements: 'Group includes children (ages 8-12)',
+        emergencyContact: 'Lisa Chen +1-555-0789',
+        fitnessLevel: 'moderate',
+        status: 'pending',
+        assignedGuide: null,
+        submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+        assignedAt: null,
+        destinationNames: [
+          { id: 3, name: 'Chitwan National Park' }
+        ]
+      }
+    ];
+    
+    // Create notifications for the demo guide
+    const notifications = JSON.parse(localStorage.getItem('nepal_guide_notifications') || '{}');
+    if (!notifications['demo-guide-1']) {
+      notifications['demo-guide-1'] = [
+        {
+          id: 'notif-1',
+          type: 'assignment',
+          title: 'New Tour Assignment!',
+          message: `You have been assigned to Demo Tourist's trekking tour`,
+          requestId: 'demo-request-1',
+          timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          read: false
+        },
+        {
+          id: 'notif-2',
+          type: 'assignment',
+          title: 'New Tour Assignment!',
+          message: `You have been assigned to Sarah Johnson's culture tour`,
+          requestId: 'demo-request-2',
+          timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+          read: false
+        }
+      ];
+      localStorage.setItem('nepal_guide_notifications', JSON.stringify(notifications));
+    }
+    
+    return demoRequests;
+  }
   useEffect(() => {
     localStorage.setItem('nepal_guide_guides', JSON.stringify(guides));
   }, [guides]);

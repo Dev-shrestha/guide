@@ -13,7 +13,9 @@ import {
   AlertCircle,
   Users,
   Award,
-  TrendingUp
+  TrendingUp,
+  Bell,
+  X
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -126,7 +128,74 @@ const GuideDashboard = () => {
 
         {/* Header */}
         <div className="mb-8">
+          <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900">Welcome, {user.name}! 🏔️</h1>
+            
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+              >
+                <Bell className="h-6 w-6" />
+                {notifications.filter(n => !n.read).length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {notifications.filter(n => !n.read).length}
+                  </span>
+                )}
+              </button>
+              
+              {/* Notifications Dropdown */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="p-4 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                      {notifications.length > 0 && (
+                        <button
+                          onClick={handleClearNotifications}
+                          className="text-sm text-blue-600 hover:text-blue-700"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="max-h-64 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500">
+                        <Bell className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                        <p>No notifications</p>
+                      </div>
+                    ) : (
+                      notifications.map(notification => (
+                        <div
+                          key={notification.id}
+                          onClick={() => handleNotificationClick(notification.id, notification.requestId)}
+                          className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
+                            !notification.read ? 'bg-blue-50' : ''
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <p className="font-medium text-gray-900">{notification.title}</p>
+                              <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                              <p className="text-xs text-gray-400 mt-2">
+                                {new Date(notification.timestamp).toLocaleString()}
+                              </p>
+                            </div>
+                            {!notification.read && (
+                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           <p className="text-gray-600 mt-2">Manage your tour assignments and help tourists explore Nepal</p>
         </div>
 

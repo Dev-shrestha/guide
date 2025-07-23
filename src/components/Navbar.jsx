@@ -45,7 +45,7 @@ const Navbar = () => {
                 >
                   Dashboard
                 </Link>
-                {user.role !== 'admin' && (
+                {user.role === 'tourist' && (
                   <Link 
                     to="/request" 
                     className={`${isActive('/request') ? 'text-blue-600' : 'text-gray-700'} hover:text-blue-600 transition-colors`}
@@ -136,7 +136,7 @@ const Navbar = () => {
                 >
                   Dashboard
                 </Link>
-                {user.role !== 'admin' && (
+                {user.role === 'tourist' && (
                   <Link 
                     to="/request" 
                     className={`block px-3 py-2 rounded-md ${isActive('/request') ? 'text-blue-600 bg-blue-50' : 'text-gray-700'} hover:text-blue-600 hover:bg-blue-50`}

@@ -35,10 +35,12 @@ const AdminDashboard = () => {
     const guide = guides.find(g => g.id === guideId);
     
     // Show success message to admin
-    setMessage({ 
-      type: 'success', 
-      text: `Successfully assigned ${guide.name} to ${request.touristName}'s ${request.tourType} tour. The guide has been notified.` 
-    });
+    if (request && guide) {
+      setMessage({ 
+        type: 'success', 
+        text: `Successfully assigned ${guide.name} to ${request.touristName}'s ${request.tourType} tour. The guide has been notified.` 
+      });
+    }
     setTimeout(() => setMessage(null), 5000);
     
     setSelectedRequest(null);
