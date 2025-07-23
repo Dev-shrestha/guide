@@ -19,14 +19,22 @@ import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 
 const GuideDashboard = () => {
-  const { requests, updateRequestStatus } = useData();
+  const { requests, updateRequestStatus, getNotifications, markNotificationAsRead, clearNotifications } = useData();
   const { user } = useAuth();
   const location = useLocation();
   const [notification, setNotification] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   // Get requests assigned to this guide
   const myAssignments = requests.filter(req => req.assignedGuide === user.id);
+
+  // Load notifications
+  useEffect(() => {
+    const userNotifications = getNotifications(user.id);
+    setNotifications(userNotifications);
+  }, [user.id, getNotifications]);
 
   useEffect(() => {
     if (location.state?.message) {
@@ -65,6 +73,26 @@ const GuideDashboard = () => {
       message: `Request status updated to ${newStatus}`
     });
     setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleNotificationClick = (notificationId, requestId) => {
+    markNotificationAsRead(user.id, notificationId);
+    setNotifications(prev => prev.map(notif => 
+      notif.id === notificationId ? { ...notif, read: true } : notif
+    ));
+    
+    // Find and highlight the related request
+    const request = myAssignments.find(req => req.id === requestId);
+    if (request) {
+      setSelectedRequest(request);
+    }
+    setShowNotifications(false);
+  };
+
+  const handleClearNotifications = () => {
+    clearNotifications(user.id);
+    setNotifications([]);
+    setShowNotifications(false);
   };
 
   const getDestinationName = (destId) => {
@@ -207,9 +235,26 @@ const GuideDashboard = () => {
             <div className="space-y-6">
               {myAssignments.map((request) => {
                 const StatusIcon = getStatusIcon(request.status);
+                const hasUnreadNotification = notifications.some(n => 
+                  n.requestId === request.id && !n.read && n.type === 'assignment'
+                );
                 
                 return (
-                  <div key={request.id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                  <div 
+                    key={request.id} 
+                    className={`border rounded-lg p-6 hover:shadow-md transition-shadow ${
+                      hasUnreadNotification ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                    } ${selectedRequest?.id === request.id ? 'ring-2 ring-blue-500' : ''}`}
+                  >
+                    {hasUnreadNotification && (
+                      <div className="mb-4 p-3 bg-blue-100 border border-blue-200 rounded-lg">
+                        <div className="flex items-center">
+                          <Bell className="h-4 w-4 text-blue-600 mr-2" />
+                          <span className="text-sm font-medium text-blue-800">New Assignment!</span>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center space-x-3">
                         <StatusIcon className="h-6 w-6 text-gray-400" />
@@ -343,9 +388,17 @@ const GuideDashboard = () => {
         {selectedRequest && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Contact {selectedRequest.touristName}
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Contact {selectedRequest.touristName}
+                </h3>
+                <button
+                  onClick={() => setSelectedRequest(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <Mail className="h-5 w-5 text-gray-400" />
@@ -380,6 +433,14 @@ const GuideDashboard = () => {
               </div>
             </div>
           </div>
+        )}
+        
+        {/* Click outside to close notifications */}
+        {showNotifications && (
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setShowNotifications(false)}
+          ></div>
         )}
       </div>
     </div>

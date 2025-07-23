@@ -182,12 +182,32 @@ export const DataProvider = ({ children }) => {
         : req
     ));
     
-    // Don't automatically mark guide as unavailable - they can handle multiple assignments
-    
-    // In a real application, this would send notifications
+    // Create notification for the assigned guide
     const request = requests.find(r => r.id === requestId);
     const guide = guides.find(g => g.id === guideId);
-    console.log(`✅ Guide Assignment: ${guide?.name} has been assigned to ${request?.touristName}'s ${request?.tourType} tour`);
+    
+    if (request && guide) {
+      // Store notification in localStorage for the guide
+      const notifications = JSON.parse(localStorage.getItem('nepal_guide_notifications') || '{}');
+      if (!notifications[guideId]) {
+        notifications[guideId] = [];
+      }
+      
+      const notification = {
+        id: Date.now().toString(),
+        type: 'assignment',
+        title: 'New Tour Assignment!',
+        message: `You have been assigned to ${request.touristName}'s ${request.tourType} tour`,
+        requestId: requestId,
+        timestamp: new Date().toISOString(),
+        read: false
+      };
+      
+      notifications[guideId].push(notification);
+      localStorage.setItem('nepal_guide_notifications', JSON.stringify(notifications));
+      
+      console.log(`✅ Guide Assignment: ${guide.name} has been assigned to ${request.touristName}'s ${request.tourType} tour`);
+    }
   };
 
   const updateRequestStatus = (requestId, status) => {
@@ -218,6 +238,29 @@ export const DataProvider = ({ children }) => {
     ));
   };
 
+  const getNotifications = (userId) => {
+    const notifications = JSON.parse(localStorage.getItem('nepal_guide_notifications') || '{}');
+    return notifications[userId] || [];
+  };
+
+  const markNotificationAsRead = (userId, notificationId) => {
+    const notifications = JSON.parse(localStorage.getItem('nepal_guide_notifications') || '{}');
+    if (notifications[userId]) {
+      notifications[userId] = notifications[userId].map(notif => 
+        notif.id === notificationId ? { ...notif, read: true } : notif
+      );
+      localStorage.setItem('nepal_guide_notifications', JSON.stringify(notifications));
+    }
+  };
+
+  const clearNotifications = (userId) => {
+    const notifications = JSON.parse(localStorage.getItem('nepal_guide_notifications') || '{}');
+    if (notifications[userId]) {
+      notifications[userId] = [];
+      localStorage.setItem('nepal_guide_notifications', JSON.stringify(notifications));
+    }
+  };
+
   const value = {
     destinations,
     guides,
@@ -225,7 +268,10 @@ export const DataProvider = ({ children }) => {
     submitRequest,
     assignGuide,
     updateRequestStatus,
-    updateGuide
+    updateGuide,
+    getNotifications,
+    markNotificationAsRead,
+    clearNotifications
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

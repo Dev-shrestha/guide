@@ -33,10 +33,19 @@ const AdminDashboard = () => {
     assignGuide(requestId, guideId);
     const request = requests.find(r => r.id === requestId);
     const guide = guides.find(g => g.id === guideId);
-    console.log(`Notification: Guide ${guide.name} assigned to ${request.touristName}'s request`);
+    
+    // Show success message to admin
+    setMessage({ 
+      type: 'success', 
+      text: `Successfully assigned ${guide.name} to ${request.touristName}'s ${request.tourType} tour. The guide has been notified.` 
+    });
+    setTimeout(() => setMessage(null), 5000);
+    
     setSelectedRequest(null);
     setShowGuideModal(false);
   };
+  
+  const [message, setMessage] = useState(null);
 
   const getAvailableGuides = (request) => {
     return guides.filter(guide => {
@@ -278,6 +287,19 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
+          {/* Success Message */}
+          {message && (
+            <div className={`mb-6 p-4 rounded-md ${
+              message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 
+              'bg-red-50 border border-red-200 text-red-800'
+            }`}>
+              <div className="flex">
+                <CheckCircle className="h-5 w-5 mt-0.5 mr-3" />
+                <p>{message.text}</p>
+              </div>
+            </div>
+          )}
+          
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600 mt-2">Manage guide requests and assignments</p>
         </div>
